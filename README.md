@@ -7,30 +7,28 @@ It is useful for things like sending emails, calling APIs, or any action you wan
 
 You "wrap" your function with a limiter.
 The limiter keeps track of how many times your function was called in the last minute.
-If you call it too many times, it blocks the call and throws an error.
+If you call it too many times, extra calls are automatically queued and will run as soon as allowed—no calls are lost or blocked.
 
 ## Example
 
 See [`example_email.js`](./example_email.js):
 
 ```js
-const { rateLimitWrap } = require('./index');
+const { rate_limit_wrap } = require('./index');
 
-function sendEmail() {
+function send_email() {
   console.log('Email sent!');
 }
 
-// Only allow 3 emails per minute
-const limitedSendEmail = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
+// Only allow 3 emails per 60,000ms (1 minute)
+const limited_send_email = rate_limit_wrap(send_email, { max_per_window: 3, window_length: 60000 });
 
-for (let i = 1; i <= 5; i++) {
-  try {
-    limitedSendEmail();
+(async () => {
+  for (let i = 1; i <= 5; i++) {
+    await limited_send_email();
     console.log(`Email ${i} sent.`);
-  } catch (err) {
-    console.log(`Email ${i} blocked: ${err.message}`);
   }
-}
+})();
 ```
 
 ## Why limit function calls?
@@ -42,8 +40,8 @@ for (let i = 1; i <= 5; i++) {
 ## How does it work inside?
 
 - Every time you call the wrapped function, the limiter checks how many times it was called in the last 60 seconds.
-- If you haven't reached the limit, your function runs.
-- If you have, it throws an error.
+- If you haven't reached the limit, your function runs immediately.
+- If you have, your call is added to a queue and will run as soon as allowed—no calls are lost or blocked.
 
 ## Learn more
 
@@ -52,10 +50,11 @@ for (let i = 1; i <= 5; i++) {
 
 ## API
 
-### `rateLimitWrap(fn, { maxPerMinute })`
+### `rate_limit_wrap(fn, { max_per_window, window_length })`
 
 - `fn`: The function you want to limit.
-- `maxPerMinute`: How many times per minute you want to allow calling `fn`.
+- `max_per_window`: Maximum number of calls allowed within the time window.
+- `window_length`: Length of the time window in milliseconds (e.g., 60000 for 1 minute).
 
 Returns a new function.
 Call this new function instead of your original one.
