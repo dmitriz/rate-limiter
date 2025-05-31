@@ -21,7 +21,7 @@ function sendEmail() {
 }
 
 // Only allow 3 emails per minute
-const limitedSendEmail = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
+const limited_send_email = rate_limit_wrap(send_email, { max_per_window: 3, window_length: 60000 });
 
 (async () => {
   for (let i = 1; i <= 5; i++) {
