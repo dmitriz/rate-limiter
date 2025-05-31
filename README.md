@@ -7,7 +7,7 @@ It is useful for things like sending emails, calling APIs, or any action you wan
 
 You "wrap" your function with a limiter.
 The limiter keeps track of how many times your function was called in the last minute.
-If you call it too many times, it blocks the call and throws an error.
+If you call it too many times, extra calls are automatically queued and will run as soon as allowed—no calls are lost or blocked.
 
 ## Example
 
@@ -40,8 +40,8 @@ const limitedSendEmail = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
 ## How does it work inside?
 
 - Every time you call the wrapped function, the limiter checks how many times it was called in the last 60 seconds.
-- If you haven't reached the limit, your function runs.
-- If you have, it throws an error.
+- If you haven't reached the limit, your function runs immediately.
+- If you have, your call is added to a queue and will run as soon as allowed—no calls are lost or blocked.
 
 ## Learn more
 
