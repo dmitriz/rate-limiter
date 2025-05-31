@@ -21,7 +21,7 @@ function sendEmail() {
 }
 
 // Only allow 3 emails per minute
-const limited_send_email = rate_limit_wrap(send_email, { max_per_window: 3, window_length: 60000 });
+const limitedSendEmail = rateLimitWrap(sendEmail, { max_per_window: 3, window_length: 60000 });
 
 (async () => {
   for (let i = 1; i <= 5; i++) {
@@ -50,10 +50,11 @@ const limited_send_email = rate_limit_wrap(send_email, { max_per_window: 3, wind
 
 ## API
 
-### `rateLimitWrap(fn, { maxPerMinute })`
+### `rateLimitWrap(fn, { max_per_window, window_length })`
 
 - `fn`: The function you want to limit.
-- `maxPerMinute`: How many times per minute you want to allow calling `fn`.
+- `max_per_window`: Maximum number of calls allowed per window.
+- `window_length`: Length of the window in milliseconds (e.g., 60000 for 1 minute).
 
 Returns a new function.
 Call this new function instead of your original one.

@@ -6,7 +6,7 @@
  * 
  * Usage:
  *   const { rateLimitWrap } = require('./index');
- *   const limitedSend = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
+ *   const limitedSend = rateLimitWrap(sendEmail, { max_per_window: 3, window_length: 60000 });
  *   limitedSend().then(() => ...);
  * 
  * See README.md for details.
