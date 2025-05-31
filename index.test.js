@@ -1,40 +1,57 @@
-const rateLimit = require('./index');
+const { rateLimitWrap } = require('./index');
 
-describe('Token Bucket Rate Limiter', () => {
-  let bucket;
+describe('rateLimitWrap', () => {
+  jest.useFakeTimers();
+  let fn, limitedFn, results;
 
   beforeEach(() => {
-    bucket = { tokens: 10, lastRefill: Date.now() };
+    results = [];
+    fn = jest.fn((x) => {
+      results.push(x);
+      return x;
+    });
+    limitedFn = rateLimitWrap(fn, { max_per_window: 2, window_length: 1000 });
   });
 
-  test('allows request when tokens available', () => {
-    const result = rateLimit({ bucket, tokens: 1, refillRate: 10, capacity: 10 });
-    expect(result.allowed).toBe(true);
-    expect(result.bucket.tokens).toBe(9);
+  test('allows up to max_per_window calls immediately', async () => {
+    const p1 = limitedFn(1);
+    const p2 = limitedFn(2);
+    await Promise.all([p1, p2]);
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(results).toEqual([1, 2]);
   });
 
-  test('denies request when insufficient tokens', () => {
-    const result = rateLimit({ bucket, tokens: 11, refillRate: 10, capacity: 10 });
-    expect(result.allowed).toBe(false);
-    expect(result.wait).toBeGreaterThan(0);
+  test('queues calls over the limit and runs them after window', async () => {
+    const p1 = limitedFn(1);
+    const p2 = limitedFn(2);
+    const p3 = limitedFn(3);
+    await Promise.all([p1, p2]);
+    expect(fn).toHaveBeenCalledTimes(2);
+    expect(results).toEqual([1, 2]);
+
+    // p3 should be queued
+    jest.advanceTimersByTime(1000);
+    await p3;
+    expect(fn).toHaveBeenCalledTimes(3);
+    expect(results).toEqual([1, 2, 3]);
   });
 
-  test('refills tokens over time', () => {
-    // Use up all tokens
-    bucket.tokens = 0;
-    bucket.lastRefill = Date.now() - 60000; // 1 minute ago
-    
-    const result = rateLimit({ bucket, tokens: 1, refillRate: 10, capacity: 10 });
-    expect(result.allowed).toBe(true);
-    expect(result.bucket.tokens).toBe(9); // 10 refilled - 1 used
+  test('processes queue in correct order (all at once after window)', async () => {
+    const p1 = limitedFn('a');
+    const p2 = limitedFn('b');
+    const p3 = limitedFn('c');
+    const p4 = limitedFn('d');
+
+    await Promise.all([p1, p2]);
+    expect(results).toEqual(['a', 'b']);
+
+    jest.advanceTimersByTime(1000);
+    await Promise.all([p3, p4]);
+    expect(results).toEqual(['a', 'b', 'c', 'd']);
   });
 
-  test('calculates correct wait time', () => {
-    bucket.tokens = 0;
-    bucket.lastRefill = Date.now();
-    
-    const result = rateLimit({ bucket, tokens: 1, refillRate: 10, capacity: 10 });
-    expect(result.allowed).toBe(false);
-    expect(result.wait).toBe(6000); // 60s / 10 tokens = 6s per token
+  afterEach(() => {
+    jest.clearAllTimers();
+    jest.clearAllMocks();
   });
 });
