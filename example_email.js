@@ -16,10 +16,12 @@ const sendEmail = (address) => {
   console.log('Sent email to:', address);
 };
 
-// Wrap the function so it can only be called 3 times per minute
-const limitedSendEmail = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
+// Wrap the function so it can only be called 1 time per second
+// max_per_window: how many calls are allowed per window
+// window_length: the window size in milliseconds (e.g., 1000 ms = 1 second)
+const limitedSendEmail = rateLimitWrap(sendEmail, { max_per_window: 1, window_length: 1000 });
 
-console.log('Trying to send emails to all recipients:');
+console.log('Trying to send emails to all recipients (1 per second):');
 
 // Loop over the array and send each email, respecting the rate limit
 (async () => {
