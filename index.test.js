@@ -1,6 +1,6 @@
-const { rateLimitWrap } = require('./index');
+const { rate_limit_wrap } = require('./index');
 
-describe('rateLimitWrap', () => {
+describe('rate_limit_wrap', () => {
   jest.useFakeTimers();
   let fn, limitedFn, results;
 
@@ -10,7 +10,7 @@ describe('rateLimitWrap', () => {
       results.push(x);
       return x;
     });
-    limitedFn = rateLimitWrap(fn, { max_per_window: 2, window_length: 1000 });
+    limitedFn = rate_limit_wrap(fn, { max_per_window: 2, window_length: 1000 });
   });
 
   test('allows up to max_per_window calls immediately', async () => {
