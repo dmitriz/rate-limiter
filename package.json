@@ -1,0 +1,19 @@
+{
+  "name": "rate-limiter",
+  "version": "0.0.1",
+  "description": "A pure functional rate limiter for any function calls, with support for multiple rate limiting strategies",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "example": "node example_email.js"
+  },
+  "keywords": [
+    "rate limiter",
+    "throttle",
+    "function throttle",
+    "rate limit"
+  ],
+  "devDependencies": {
+    "jest": "^29.0.0"
+  }
+}
