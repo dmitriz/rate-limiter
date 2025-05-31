@@ -23,14 +23,12 @@ function sendEmail() {
 // Only allow 3 emails per minute
 const limitedSendEmail = rateLimitWrap(sendEmail, { maxPerMinute: 3 });
 
-for (let i = 1; i <= 5; i++) {
-  try {
-    limitedSendEmail();
+(async () => {
+  for (let i = 1; i <= 5; i++) {
+    await limitedSendEmail();
     console.log(`Email ${i} sent.`);
-  } catch (err) {
-    console.log(`Email ${i} blocked: ${err.message}`);
   }
-}
+})();
 ```
 
 ## Why limit function calls?
