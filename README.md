@@ -14,18 +14,18 @@ If you call it too many times, extra calls are automatically queued and will run
 See [`example_email.js`](./example_email.js):
 
 ```js
-const { rateLimitWrap } = require('./index');
+const { rate_limit_wrap } = require('./index');
 
-function sendEmail() {
+function send_email() {
   console.log('Email sent!');
 }
 
-// Only allow 3 emails per minute
-const limitedSendEmail = rateLimitWrap(sendEmail, { max_per_window: 3, window_length: 60000 });
+// Only allow 3 emails per 60,000ms (1 minute)
+const limited_send_email = rate_limit_wrap(send_email, { max_per_window: 3, window_length: 60000 });
 
 (async () => {
   for (let i = 1; i <= 5; i++) {
-    await limitedSendEmail();
+    await limited_send_email();
     console.log(`Email ${i} sent.`);
   }
 })();
@@ -50,11 +50,11 @@ const limitedSendEmail = rateLimitWrap(sendEmail, { max_per_window: 3, window_le
 
 ## API
 
-### `rateLimitWrap(fn, { max_per_window, window_length })`
+### `rate_limit_wrap(fn, { max_per_window, window_length })`
 
 - `fn`: The function you want to limit.
-- `max_per_window`: Maximum number of calls allowed per window.
-- `window_length`: Length of the window in milliseconds (e.g., 60000 for 1 minute).
+- `max_per_window`: Maximum number of calls allowed within the time window.
+- `window_length`: Length of the time window in milliseconds (e.g., 60000 for 1 minute).
 
 Returns a new function.
 Call this new function instead of your original one.
